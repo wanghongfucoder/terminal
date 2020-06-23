@@ -389,9 +389,6 @@ namespace winrt::TerminalApp::implementation
 
         auto weakThis{ get_weak() };
         auto weakCommand{ command->get_weak() };
-        // PropertyChanged is the generic mechanism by which the Tab
-        // communicates changes to any of its observable properties, including
-        // the Title
         tab.PropertyChanged([weakThis, weakCommand, tab](auto&&, const Windows::UI::Xaml::Data::PropertyChangedEventArgs& args) {
             auto palette{ weakThis.get() };
             auto command{ weakCommand.get() };
@@ -407,10 +404,12 @@ namespace winrt::TerminalApp::implementation
         if (inserted)
         {
             _allTabActions.InsertAt(idx, *command);
+            _updateFilteredActions();
         }
         else
         {
             _allTabActions.SetAt(idx, *command);
+            _updateFilteredActions();
         }
     }
 
