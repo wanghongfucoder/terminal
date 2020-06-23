@@ -33,7 +33,7 @@ static constexpr std::string_view ResizePaneKey{ "resizePane" };
 static constexpr std::string_view MoveFocusKey{ "moveFocus" };
 static constexpr std::string_view FindKey{ "find" };
 static constexpr std::string_view ToggleFullscreenKey{ "toggleFullscreen" };
-static constexpr std::string_view OpenTabSwitcherKey{ "OpenTabSwitcherKey" };
+static constexpr std::string_view OpenTabSwitcherKey{ "openTabSwitcher" };
 
 namespace winrt::TerminalApp::implementation
 {

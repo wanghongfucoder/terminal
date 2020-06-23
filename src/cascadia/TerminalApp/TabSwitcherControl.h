@@ -4,7 +4,6 @@
 #pragma once
 
 #include "winrt/Microsoft.UI.Xaml.Controls.h"
-#include "winrt/Windows.UI.Xaml.Interop.h"
 
 #include "TabSwitcherControl.g.h"
 #include "../../cascadia/inc/cppwinrt_utils.h"
@@ -19,25 +18,12 @@ namespace winrt::TerminalApp::implementation
         //void SetActions(Windows::Foundation::Collections::IVector<TerminalApp::Tab> const& actions);
         void ToggleVisibility();
 
-        // TabSource dependency property
-        winrt::Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab> TabSource()
-        {
-            return winrt::unbox_value<winrt::Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab>>(GetValue(_TabSourceProperty));
-        }
-
-        void TabSource(winrt::Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab> const& value)
-        {
-            SetValue(_TabSourceProperty, winrt::box_value(value));
-        }
-
-        static Windows::UI::Xaml::DependencyProperty TabSourceProperty() { return _TabSourceProperty; }
-
-        static void OnTabSourceChanged(Windows::UI::Xaml::DependencyObject const&, Windows::UI::Xaml::DependencyPropertyChangedEventArgs const&);
-
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(Closed, _closeHandlers, TerminalApp::TabSwitcherControl, winrt::Windows::UI::Xaml::RoutedEventArgs);
 
     private:
         friend struct TabSwitcherControlT<TabSwitcherControl>; // for Xaml to bind events
+
+        IVector<TerminalApp::Tab> _tabs;
 
        /* Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab> _filteredActions{ nullptr };
         Windows::Foundation::Collections::IVector<TerminalApp::Tab> _allActions{ nullptr };
@@ -54,8 +40,6 @@ namespace winrt::TerminalApp::implementation
         static int _getWeight(const winrt::hstring& searchText, const winrt::hstring& name);*/
 
         void _close();
-
-        static Windows::UI::Xaml::DependencyProperty _TabSourceProperty;
     };
 }
 

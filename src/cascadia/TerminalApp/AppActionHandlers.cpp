@@ -241,7 +241,7 @@ namespace winrt::TerminalApp::implementation
     void TerminalPage::_HandleOpenTabSwitcher(const IInspectable& /*sender*/,
                                               const TerminalApp::ActionEventArgs& args)
     {
-        // TODO HANDLE
+        TabSwitcherControl().ToggleVisibility();
         args.Handled(true);
     }
 }

@@ -159,6 +159,11 @@ namespace winrt::TerminalApp::implementation
         _layoutUpdatedRevoker = _tabContent.LayoutUpdated(winrt::auto_revoke, { this, &TerminalPage::_OnFirstLayout });
     }
 
+    Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab> TerminalPage::Tabs()
+    {
+        return _tabs;
+    }
+
     // Method Description:
     // - This method is called once on startup, on the first LayoutUpdated event.
     //   We'll use this event to know that we have an ActualWidth and

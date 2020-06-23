@@ -2,14 +2,13 @@
 // Licensed under the MIT license.
 
 import "../Tab.idl";
+import "../TerminalPage.idl";
 
 namespace TerminalApp
 {
     [default_interface] runtimeclass TabSwitcherControl : Windows.UI.Xaml.Controls.Grid
     {
         TabSwitcherControl();
-
-        static Windows.UI.Xaml.DependencyProperty TabSourceProperty { get; };
 
         //Windows.Foundation.Collections.IObservableVector<TerminalApp.Tab> FilteredActions { get; };
 

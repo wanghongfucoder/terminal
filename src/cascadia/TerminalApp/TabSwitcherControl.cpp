@@ -31,17 +31,6 @@ namespace winrt::TerminalApp::implementation
         }
     }
 
-    Windows::UI::Xaml::DependencyProperty TabSwitcherControl::_TabSourceProperty =
-        Windows::UI::Xaml::DependencyProperty::Register(
-            L"TabSource",
-            ::winrt::xaml_typename<winrt::Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab>>(),
-            ::winrt::xaml_typename<TerminalApp::TabSwitcherControl>(),
-            Windows::UI::Xaml::PropertyMetadata{ winrt::single_threaded_observable_vector<TerminalApp::Tab>(), Windows::UI::Xaml::PropertyChangedCallback{ &TabSwitcherControl::OnTabSourceChanged } });
-
-    void TabSwitcherControl::OnTabSourceChanged(Windows::UI::Xaml::DependencyObject const&, Windows::UI::Xaml::DependencyPropertyChangedEventArgs const&)
-    {
-    }
-
     // Method Description:
     // - Toggles the visibility of the command palette. This will auto-focus the
     //   input box within the palette.
@@ -344,7 +333,6 @@ namespace winrt::TerminalApp::implementation
     // - <none>
     void TabSwitcherControl::_close()
     {
-
         Visibility(Visibility::Collapsed);
         // TODO: Do we want to clear the text box each time we close the dialog? Or leave it?
         // I think if we decide to leave it, we should auto-select all the text
