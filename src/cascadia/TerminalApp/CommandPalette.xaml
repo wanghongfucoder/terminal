@@ -60,7 +60,9 @@ the MIT License. See LICENSE in the project root for license information. -->
             x:Name="_SearchBox"
             Margin="8"
             TextChanged="_filterTextChanged"
+            PreviewKeyDown="_previewKeyDownHandler"
             KeyDown="_keyDownHandler"
+            KeyUp="_keyUpHandler"
             Text="">
         </TextBox>
 

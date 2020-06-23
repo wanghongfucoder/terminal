@@ -15,6 +15,7 @@ using namespace winrt::Windows::UI::Xaml;
 using namespace winrt::Windows::System;
 using namespace winrt::Windows::Foundation;
 using namespace winrt::Windows::Foundation::Collections;
+using namespace winrt::Windows::UI::Core;
 
 namespace winrt::TerminalApp::implementation
 {
@@ -81,6 +82,25 @@ namespace winrt::TerminalApp::implementation
         _FilteredActionsView().ScrollIntoView(_FilteredActionsView().SelectedItem());
     }
 
+    void CommandPalette::_previewKeyDownHandler(Windows::Foundation::IInspectable const& /*sender*/,
+                                                Windows::UI::Xaml::Input::KeyRoutedEventArgs const& e)
+    {
+        auto key = e.OriginalKey();
+
+        if (_tabSwitcherMode)
+        {
+            auto const state = CoreWindow::GetForCurrentThread().GetKeyState(winrt::Windows::System::VirtualKey::Control);
+            if (WI_IsFlagSet(state, CoreVirtualKeyStates::Down))
+            {
+                if (key == VirtualKey::Tab)
+                {
+                    _selectNextItem(true);
+                    e.Handled(true);
+                }
+            }
+        }
+    }
+
     // Method Description:
     // - Process keystrokes in the input box. This is used for moving focus up
     //   and down the list of commands in Action mode, and for executing
@@ -126,6 +146,33 @@ namespace winrt::TerminalApp::implementation
         {
             // Action Mode: Dismiss the palette.
             _close();
+        }
+    }
+
+    void CommandPalette::_keyUpHandler(Windows::Foundation::IInspectable const& /*sender*/,
+                                       Windows::UI::Xaml::Input::KeyRoutedEventArgs const& e)
+    {
+        auto key = e.OriginalKey();
+
+        if (_tabSwitcherMode)
+        {
+            if (key == VirtualKey::Control)
+            {
+                // Once the user lifts the anchor key, we'll switch to the currently selected tab
+                // then close the tab switcher.
+
+                if (const auto selectedItem = _FilteredActionsView().SelectedItem())
+                {
+                    if (const auto data = selectedItem.try_as<TerminalApp::Command>())
+                    {
+                        const auto actionAndArgs = data.Action();
+                        _dispatch.DoAction(actionAndArgs);
+                        ToggleTabSwitcher();
+                    }
+                }
+
+                e.Handled(true);
+            }
         }
     }
 
