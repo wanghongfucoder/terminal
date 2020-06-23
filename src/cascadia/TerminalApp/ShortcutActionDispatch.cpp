@@ -164,6 +164,11 @@ namespace winrt::TerminalApp::implementation
             _ToggleCommandPaletteHandlers(*this, *eventArgs);
             break;
         }
+        case ShortcutAction::ToggleTabSwitcher:
+        {
+            _ToggleTabSwitcherHandlers(*this, *eventArgs);
+            break;
+        }
         default:
             return false;
         }

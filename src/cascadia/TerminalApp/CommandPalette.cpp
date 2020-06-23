@@ -3,6 +3,9 @@
 
 #include "pch.h"
 #include "CommandPalette.h"
+#include "ActionAndArgs.h"
+#include "ActionArgs.h"
+#include "Command.h"
 
 #include "CommandPalette.g.cpp"
 
@@ -22,6 +25,7 @@ namespace winrt::TerminalApp::implementation
         _filteredActions = winrt::single_threaded_observable_vector<winrt::TerminalApp::Command>();
         _allActions = winrt::single_threaded_vector<winrt::TerminalApp::Command>();
         _allTabs = winrt::single_threaded_vector<winrt::TerminalApp::Tab>();
+        _allTabActions = winrt::single_threaded_vector<winrt::TerminalApp::Command>();
 
         if (CommandPaletteShadow())
         {
@@ -108,7 +112,7 @@ namespace winrt::TerminalApp::implementation
 
             if (const auto selectedItem = _FilteredActionsView().SelectedItem())
             {
-                if (const auto data = selectedItem.try_as<Command>())
+                if (const auto data = selectedItem.try_as<TerminalApp::Command>())
                 {
                     const auto actionAndArgs = data.Action();
                     _dispatch.DoAction(actionAndArgs);
@@ -139,7 +143,7 @@ namespace winrt::TerminalApp::implementation
         _FilteredActionsView().SelectedIndex(0);
     }
 
-    Collections::IObservableVector<Command> CommandPalette::FilteredActions()
+    Collections::IObservableVector<TerminalApp::Command> CommandPalette::FilteredActions()
     {
         return _filteredActions;
     }
@@ -181,7 +185,7 @@ namespace winrt::TerminalApp::implementation
         //   the list".
         // - TODO GH#TODO:"Recently used commands" ordering also seems valuable.
 
-        auto compare = [searchText](const Command& left, const Command& right) {
+        auto compare = [searchText](const TerminalApp::Command& left, const TerminalApp::Command& right) {
             const int leftWeight = _getWeight(left.Name(), searchText);
             const int rightWeight = _getWeight(right.Name(), searchText);
             return leftWeight < rightWeight;
@@ -190,7 +194,7 @@ namespace winrt::TerminalApp::implementation
         // Use a priority queue to order commands so that "better" matches
         // appear first in the list. The ordering will be determined by the
         // match weight produced by _getWeight.
-        std::priority_queue<Command, std::vector<Command>, decltype(compare)> heap(compare);
+        std::priority_queue<TerminalApp::Command, std::vector<TerminalApp::Command>, decltype(compare)> heap(compare);
         for (auto action : _allActions)
         {
             if (CommandPalette::_filterMatchesName(searchText, action.Name()))
@@ -349,21 +353,84 @@ namespace winrt::TerminalApp::implementation
                 {
                     auto tab = tabList.GetAt(idx);
                     _allTabs.SetAt(idx, tab);
+                    GenerateCommandForTab(idx, false);
                     break;
                 }
                 case CollectionChange::ItemInserted:
                 {
                     auto tab = tabList.GetAt(idx);
                     _allTabs.InsertAt(idx, tab);
+                    GenerateCommandForTab(idx, true);
                     break;
                 }
                 case CollectionChange::ItemRemoved:
                 {
                     _allTabs.RemoveAt(idx);
+                    _allTabActions.RemoveAt(idx);
                     break;
                 }
             }
         }
+    }
+
+    void CommandPalette::GenerateCommandForTab(const uint32_t idx, bool inserted)
+    {
+        auto tab = _allTabs.GetAt(idx);
+
+        auto focusTabAction = winrt::make_self<implementation::ActionAndArgs>();
+        auto args = winrt::make_self<implementation::SwitchToTabArgs>();
+        args->TabIndex(idx);
+
+        focusTabAction->Action(ShortcutAction::SwitchToTab);
+        focusTabAction->Args(*args);
+
+        auto command = winrt::make_self<implementation::Command>();
+        command->Action(*focusTabAction);
+
+        auto weakThis{ get_weak() };
+        auto weakCommand{ command->get_weak() };
+        // PropertyChanged is the generic mechanism by which the Tab
+        // communicates changes to any of its observable properties, including
+        // the Title
+        tab.PropertyChanged([weakThis, weakCommand, tab](auto&&, const Windows::UI::Xaml::Data::PropertyChangedEventArgs& args) {
+            auto palette{ weakThis.get() };
+            auto command{ weakCommand.get() };
+            if (palette && command)
+            {
+                if (args.PropertyName() == L"Title")
+                {
+                    command->Name(tab.Title());
+                }
+            }
+        });
+
+        if (inserted)
+        {
+            _allTabActions.InsertAt(idx, *command);
+        }
+        else
+        {
+            _allTabActions.SetAt(idx, *command);
+        }
+    }
+
+    void CommandPalette::ToggleTabSwitcher()
+    {
+        if (_tabSwitcherMode)
+        {
+            _tabSwitcherMode = true;
+            _allActions = _allTabActions;
+            _updateFilteredActions();
+            ToggleVisibility();
+        }
+        else
+        {
+            _tabSwitcherMode = false;
+            // TODO: Callback to tell TerminalPage to set actions to command palette again.
+            _updateFilteredActions();
+            ToggleVisibility();
+        }
+        
     }
 
     DEFINE_EVENT_WITH_TYPED_EVENT_HANDLER(CommandPalette, Closed, _closeHandlers, TerminalApp::CommandPalette, winrt::Windows::UI::Xaml::RoutedEventArgs);

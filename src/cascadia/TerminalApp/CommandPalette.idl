@@ -16,6 +16,7 @@ namespace TerminalApp
         void ToggleVisibility();
         void SetDispatch(ShortcutActionDispatch dispatch);
 
+        void ToggleTabSwitcher();
         void OnTabsChanged(IInspectable s, Windows.Foundation.Collections.IVectorChangedEventArgs e);
 
         event Windows.Foundation.TypedEventHandler<CommandPalette, Windows.UI.Xaml.RoutedEventArgs> Closed;

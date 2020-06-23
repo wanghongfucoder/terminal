@@ -823,6 +823,7 @@ namespace winrt::TerminalApp::implementation
         _actionDispatch->ResetFontSize({ this, &TerminalPage::_HandleResetFontSize });
         _actionDispatch->ToggleFullscreen({ this, &TerminalPage::_HandleToggleFullscreen });
         _actionDispatch->ToggleCommandPalette({ this, &TerminalPage::_HandleToggleCommandPalette });
+        _actionDispatch->ToggleTabSwitcher({ this, &TerminalPage::_HandleToggleTabSwitcher });
     }
 
     // Method Description:

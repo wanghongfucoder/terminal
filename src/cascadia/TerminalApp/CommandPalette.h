@@ -19,9 +19,11 @@ namespace winrt::TerminalApp::implementation
         void ToggleVisibility();
         void SetDispatch(const winrt::TerminalApp::ShortcutActionDispatch& dispatch);
 
-        void OnTabsChanged(const Windows::Foundation::IInspectable& s, const Windows::Foundation::Collections::IVectorChangedEventArgs& e);
-
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(Closed, _closeHandlers, TerminalApp::CommandPalette, winrt::Windows::UI::Xaml::RoutedEventArgs);
+
+        // TabSwitcherMode Specific:
+        void ToggleTabSwitcher();
+        void OnTabsChanged(const Windows::Foundation::IInspectable& s, const Windows::Foundation::Collections::IVectorChangedEventArgs& e);
 
     private:
         friend struct CommandPaletteT<CommandPalette>; // for Xaml to bind events
@@ -42,8 +44,11 @@ namespace winrt::TerminalApp::implementation
         static int _getWeight(const winrt::hstring& searchText, const winrt::hstring& name);
         void _close();
 
-        bool _tabSwitcherMode{ false };
+        // TabSwitcherMode Specific:
+        bool _tabSwitcherMode{ true };
+        void GenerateCommandForTab(const uint32_t idx, bool inserted);
         Windows::Foundation::Collections::IVector<TerminalApp::Tab> _allTabs{ nullptr };
+        Windows::Foundation::Collections::IVector<TerminalApp::Command> _allTabActions{ nullptr };
     };
 }
 

@@ -30,6 +30,7 @@ static constexpr std::string_view MoveFocusKey{ "moveFocus" };
 static constexpr std::string_view FindKey{ "find" };
 static constexpr std::string_view ToggleFullscreenKey{ "toggleFullscreen" };
 static constexpr std::string_view ToggleCommandPaletteKey{ "toggleCommandPalette" };
+static constexpr std::string_view ToggleTabSwitcherKey{ "toggleTabSwitcher" };
 
 static constexpr std::string_view ActionKey{ "action" };
 
@@ -73,6 +74,8 @@ namespace winrt::TerminalApp::implementation
         { UnboundKey, ShortcutAction::Invalid },
         { FindKey, ShortcutAction::Find },
         { ToggleCommandPaletteKey, ShortcutAction::ToggleCommandPalette },
+        { ToggleTabSwitcherKey, ShortcutAction::ToggleTabSwitcher },
+
     };
 
     using ParseResult = std::tuple<IActionArgs, std::vector<::TerminalApp::SettingsLoadWarnings>>;
@@ -244,6 +247,7 @@ namespace winrt::TerminalApp::implementation
                 { ShortcutAction::Invalid, L"" },
                 { ShortcutAction::Find, RS_(L"FindCommandKey") },
                 { ShortcutAction::ToggleCommandPalette, RS_(L"ToggleCommandPaletteCommandKey") },
+                { ShortcutAction::ToggleTabSwitcher, RS_(L"ToggleTabSwitcherKey") },
             };
         }();
 

@@ -477,4 +477,7 @@
   <data name="ToggleCommandPaletteCommandKey" xml:space="preserve">
     <value>Toggle command palette</value>
   </data>
+  <data name="ToggleTabSwitcherKey" xml:space="preserve">
+    <value>Toggle tab switcher</value>
+  </data>
 </root>
