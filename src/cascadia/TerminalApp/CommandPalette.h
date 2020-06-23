@@ -39,6 +39,9 @@ namespace winrt::TerminalApp::implementation
         static bool _filterMatchesName(const winrt::hstring& searchText, const winrt::hstring& name);
         static int _getWeight(const winrt::hstring& searchText, const winrt::hstring& name);
         void _close();
+
+        bool _tabSwitcherMode{ false };
+        Windows::Foundation::Collections::IVector<TerminalApp::Tab> _allTabs{ nullptr };
     };
 }
 

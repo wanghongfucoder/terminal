@@ -60,7 +60,7 @@ namespace winrt::TerminalApp::implementation
         DECLARE_EVENT(ColorCleared, _colorCleared, winrt::delegate<>);
 
         OBSERVABLE_GETSET_PROPERTY(winrt::hstring, Title, _PropertyChangedHandlers);
-        OBSERVABLE_GETSET_PROPERTY(winrt::hstring, IconPath, _PropertyChangedHandlers);
+        OBSERVABLE_GETSET_PROPERTY(Microsoft::UI::Xaml::Controls::BitmapIconSource, IconSource, _PropertyChangedHandlers);
 
     private:
         std::shared_ptr<Pane> _rootPane{ nullptr };

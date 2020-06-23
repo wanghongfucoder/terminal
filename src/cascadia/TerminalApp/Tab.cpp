@@ -209,8 +209,13 @@ namespace winrt::TerminalApp::implementation
 
         if (auto tab{ weakThis.get() })
         {
-            IconPath(_lastIconPath);
-            _tabViewItem.IconSource(GetColoredIcon<winrt::MUX::Controls::IconSource>(_lastIconPath));
+            winrt::MUX::Controls::BitmapIconSource newIconSource;
+            winrt::Windows::Foundation::Uri iconUri{ _lastIconPath };
+            newIconSource.ShowAsMonochrome(false);
+            newIconSource.UriSource(iconUri);
+            IconSource(newIconSource);
+
+            _tabViewItem.IconSource(newIconSource);
         }
     }
 
