@@ -211,7 +211,7 @@ namespace winrt::TerminalApp::implementation
         CommandPalette().SetDispatch(*_actionDispatch);
         CommandPalette().Closed({ this, &TerminalPage::_CommandPaletteClosed });
 
-        _tabs.VectorChanged({ &_commandPalette, &CommandPalette::OnTabItemsChanged });
+        _tabs.VectorChanged({ &_commandPalette, &CommandPalette::OnTabsChanged });
 
         // Once the page is actually laid out on the screen, trigger all our
         // startup actions. Things like Panes need to know at least how big the

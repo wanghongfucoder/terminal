@@ -11,6 +11,7 @@ using namespace winrt::TerminalApp;
 using namespace winrt::Windows::UI::Xaml;
 using namespace winrt::Windows::System;
 using namespace winrt::Windows::Foundation;
+using namespace winrt::Windows::Foundation::Collections;
 
 namespace winrt::TerminalApp::implementation
 {
@@ -20,6 +21,7 @@ namespace winrt::TerminalApp::implementation
 
         _filteredActions = winrt::single_threaded_observable_vector<winrt::TerminalApp::Command>();
         _allActions = winrt::single_threaded_vector<winrt::TerminalApp::Command>();
+        _allTabs = winrt::single_threaded_vector<winrt::TerminalApp::Tab>();
 
         if (CommandPaletteShadow())
         {
@@ -332,6 +334,36 @@ namespace winrt::TerminalApp::implementation
 
         // _SearchBox().Text(L"");
         _closeHandlers(*this, RoutedEventArgs{});
+    }
+
+    void CommandPalette::OnTabsChanged(const IInspectable& s, const IVectorChangedEventArgs& e)
+    {
+        if (auto tabList = s.try_as<IObservableVector<TerminalApp::Tab>>())
+        {
+            auto idx = e.Index();
+            auto changedEvent = e.CollectionChange();
+
+            switch (changedEvent)
+            {
+                case CollectionChange::ItemChanged:
+                {
+                    auto tab = tabList.GetAt(idx);
+                    _allTabs.SetAt(idx, tab);
+                    break;
+                }
+                case CollectionChange::ItemInserted:
+                {
+                    auto tab = tabList.GetAt(idx);
+                    _allTabs.InsertAt(idx, tab);
+                    break;
+                }
+                case CollectionChange::ItemRemoved:
+                {
+                    _allTabs.RemoveAt(idx);
+                    break;
+                }
+            }
+        }
     }
 
     DEFINE_EVENT_WITH_TYPED_EVENT_HANDLER(CommandPalette, Closed, _closeHandlers, TerminalApp::CommandPalette, winrt::Windows::UI::Xaml::RoutedEventArgs);

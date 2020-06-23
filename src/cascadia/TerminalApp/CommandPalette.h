@@ -19,6 +19,8 @@ namespace winrt::TerminalApp::implementation
         void ToggleVisibility();
         void SetDispatch(const winrt::TerminalApp::ShortcutActionDispatch& dispatch);
 
+        void OnTabsChanged(const Windows::Foundation::IInspectable& s, const Windows::Foundation::Collections::IVectorChangedEventArgs& e);
+
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(Closed, _closeHandlers, TerminalApp::CommandPalette, winrt::Windows::UI::Xaml::RoutedEventArgs);
 
     private:
