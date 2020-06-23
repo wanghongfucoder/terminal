@@ -122,6 +122,7 @@ namespace winrt::TerminalApp::implementation
         _tabContent = this->TabContent();
         _tabRow = this->TabRow();
         _tabView = _tabRow.TabView();
+        _commandPalette = this->CommandPalette();
         _rearranging = false;
 
         // GH#2455 - Make sure to try/catch calls to Application::Current,
@@ -210,12 +211,19 @@ namespace winrt::TerminalApp::implementation
         CommandPalette().SetDispatch(*_actionDispatch);
         CommandPalette().Closed({ this, &TerminalPage::_CommandPaletteClosed });
 
+        _tabs.VectorChanged({ &_commandPalette, &CommandPalette::OnTabItemsChanged });
+
         // Once the page is actually laid out on the screen, trigger all our
         // startup actions. Things like Panes need to know at least how big the
         // window will be, so they can subdivide that space.
         //
         // _OnFirstLayout will remove this handler so it doesn't get called more than once.
         _layoutUpdatedRevoker = _tabContent.LayoutUpdated(winrt::auto_revoke, { this, &TerminalPage::_OnFirstLayout });
+    }
+
+    Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab> TerminalPage::Tabs()
+    {
+        return _tabs;
     }
 
     // Method Description:

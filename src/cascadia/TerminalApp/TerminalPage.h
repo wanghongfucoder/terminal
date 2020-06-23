@@ -53,6 +53,8 @@ namespace winrt::TerminalApp::implementation
 
         void SetStartupActions(std::deque<winrt::TerminalApp::ActionAndArgs>& actions);
 
+        Windows::Foundation::Collections::IObservableVector<TerminalApp::Tab> Tabs();
+
         // -------------------------------- WinRT Events ---------------------------------
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(TitleChanged, _titleChangeHandlers, winrt::Windows::Foundation::IInspectable, winrt::hstring);
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(LastTabClosed, _lastTabClosedHandlers, winrt::Windows::Foundation::IInspectable, winrt::TerminalApp::LastTabClosedEventArgs);
@@ -74,6 +76,7 @@ namespace winrt::TerminalApp::implementation
         TerminalApp::TabRowControl _tabRow{ nullptr };
         Windows::UI::Xaml::Controls::Grid _tabContent{ nullptr };
         Microsoft::UI::Xaml::Controls::SplitButton _newTabButton{ nullptr };
+        TerminalApp::CommandPalette _commandPalette{ nullptr };
 
         std::shared_ptr<::TerminalApp::CascadiaSettings> _settings{ nullptr };
 
