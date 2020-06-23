@@ -361,6 +361,12 @@ namespace winrt::TerminalApp::implementation
                     auto tab = tabList.GetAt(idx);
                     _allTabs.InsertAt(idx, tab);
                     GenerateCommandForTab(idx, true);
+
+                    // Unless we're appending to the end, we need to refresh the index indicator text.
+                    if (idx != _allTabs.Size() - 1)
+                    {
+                        RefreshTabIndices(idx);
+                    }
                     break;
                 }
                 case CollectionChange::ItemRemoved:
@@ -386,7 +392,10 @@ namespace winrt::TerminalApp::implementation
 
         auto command = winrt::make_self<implementation::Command>();
         command->Action(*focusTabAction);
+        command->KeyChordText(L"index : " + to_hstring(idx));
+        command->Name(tab.Title());
 
+        // Listen for changes to this particular Tab's title so we can update the corresponding Command name.
         auto weakThis{ get_weak() };
         auto weakCommand{ command->get_weak() };
         tab.PropertyChanged([weakThis, weakCommand, tab](auto&&, const Windows::UI::Xaml::Data::PropertyChangedEventArgs& args) {
@@ -404,12 +413,25 @@ namespace winrt::TerminalApp::implementation
         if (inserted)
         {
             _allTabActions.InsertAt(idx, *command);
-            _updateFilteredActions();
         }
         else
         {
             _allTabActions.SetAt(idx, *command);
+        }
+
+        // We don't need to update the filtered actions if the
+        // command palette's actions aren't tab switcher actions.
+        if (_tabSwitcherMode)
+        {
             _updateFilteredActions();
+        }
+    }
+
+    void CommandPalette::RefreshTabIndices(const uint32_t startIdx)
+    {
+        for (auto i = startIdx + 1; i < _allTabActions.Size(); ++i)
+        {
+            GenerateCommandForTab(i, false);
         }
     }
 

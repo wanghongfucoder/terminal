@@ -47,6 +47,7 @@ namespace winrt::TerminalApp::implementation
         // TabSwitcherMode Specific
         bool _tabSwitcherMode{ true };
         void GenerateCommandForTab(const uint32_t idx, bool inserted);
+        void RefreshTabIndices(const uint32_t startIdx);
         Windows::Foundation::Collections::IVector<TerminalApp::Tab> _allTabs{ nullptr };
         Windows::Foundation::Collections::IVector<TerminalApp::Command> _allTabActions{ nullptr };
     };
