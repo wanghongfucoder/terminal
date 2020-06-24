@@ -15,6 +15,7 @@
 #include "AdjustFontSizeArgs.g.h"
 #include "SplitPaneArgs.g.h"
 #include "OpenSettingsArgs.g.h"
+#include "ToggleTabSwitcherArgs.g.h"
 
 #include "../../cascadia/inc/cppwinrt_utils.h"
 #include "Utils.h"
@@ -448,6 +449,60 @@ namespace winrt::TerminalApp::implementation
             if (auto targetString{ json[JsonKey(TargetKey)] })
             {
                 args->_Target = ParseSettingsTarget(targetString.asString());
+            }
+            return { *args, {} };
+        }
+    };
+
+    // Possible AnchorKey values
+    // TODO:GH#2550/#3475 - move these to a centralized deserializing place
+    static constexpr std::string_view ControlString{ "ctrl" };
+    static constexpr std::string_view AltString{ "alt" };
+    static constexpr std::string_view ShiftString{ "shift" };
+
+    static TerminalApp::AnchorKey ParseAnchorKey(const std::string& anchorString)
+    {
+        if (anchorString == ControlString)
+        {
+            return TerminalApp::AnchorKey::Ctrl;
+        }
+        else if (anchorString == AltString)
+        {
+            return TerminalApp::AnchorKey::Alt;
+        }
+        else if (anchorString == ShiftString)
+        {
+            return TerminalApp::AnchorKey::Shift;
+        }
+        // default behavior for invalid data
+        return TerminalApp::AnchorKey::None;
+    };
+
+    struct ToggleTabSwitcherArgs : public ToggleTabSwitcherArgsT<ToggleTabSwitcherArgs>
+    {
+        ToggleTabSwitcherArgs() = default;
+        GETSET_PROPERTY(TerminalApp::AnchorKey, Key, TerminalApp::AnchorKey::Ctrl);
+
+        static constexpr std::string_view AnchorKey{ "anchor" };
+
+    public:
+        hstring GenerateName();
+        bool Equals(const IActionArgs& other)
+        {
+            auto otherAsUs = other.try_as<ToggleTabSwitcherArgs>();
+            if (otherAsUs)
+            {
+                return otherAsUs->_Key == _Key;
+            }
+            return false;
+        };
+        static FromJsonResult FromJson(const Json::Value& json)
+        {
+            // LOAD BEARING: Not using make_self here _will_ break you in the future!
+            auto args = winrt::make_self<ToggleTabSwitcherArgs>();
+            if (auto targetString{ json[JsonKey(AnchorKey)] })
+            {
+                args->_Key = ParseAnchorKey(targetString.asString());
             }
             return { *args, {} };
         }

@@ -45,6 +45,14 @@ namespace TerminalApp
         AllFiles
     };
 
+    enum AnchorKey
+    {
+        Ctrl = 0,
+        Alt,
+        Shift,
+        None
+    };
+
     [default_interface] runtimeclass NewTerminalArgs {
         NewTerminalArgs();
         String Commandline;
@@ -104,5 +112,10 @@ namespace TerminalApp
     [default_interface] runtimeclass OpenSettingsArgs : IActionArgs
     {
         SettingsTarget Target { get; };
+    };
+
+    [default_interface] runtimeclass ToggleTabSwitcherArgs : IActionArgs
+    {
+        AnchorKey Key { get; };
     };
 }

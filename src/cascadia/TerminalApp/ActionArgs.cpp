@@ -15,6 +15,7 @@
 #include "AdjustFontSizeArgs.g.cpp"
 #include "SplitPaneArgs.g.cpp"
 #include "OpenSettingsArgs.g.cpp"
+#include "ToggleTabSwitcherArgs.g.h"
 
 #include <LibraryResources.h>
 
@@ -196,5 +197,10 @@ namespace winrt::TerminalApp::implementation
         default:
             return RS_(L"OpenSettingsCommandKey");
         }
+    }
+
+    winrt::hstring ToggleTabSwitcherArgs::GenerateName()
+    {
+        // TODO: GENERATE NAMES
     }
 }
