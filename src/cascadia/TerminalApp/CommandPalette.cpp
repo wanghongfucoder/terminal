@@ -19,13 +19,13 @@ using namespace winrt::Windows::UI::Core;
 
 namespace winrt::TerminalApp::implementation
 {
-    CommandPalette::CommandPalette()
+    CommandPalette::CommandPalette() :
+        _anchorKey{ TerminalApp::AnchorKey::None }
     {
         InitializeComponent();
 
         _filteredActions = winrt::single_threaded_observable_vector<winrt::TerminalApp::Command>();
         _allActions = winrt::single_threaded_vector<winrt::TerminalApp::Command>();
-        _allTabs = winrt::single_threaded_vector<winrt::TerminalApp::Tab>();
         _allTabActions = winrt::single_threaded_vector<winrt::TerminalApp::Command>();
 
         if (CommandPaletteShadow())
@@ -167,7 +167,7 @@ namespace winrt::TerminalApp::implementation
                     {
                         const auto actionAndArgs = data.Action();
                         _dispatch.DoAction(actionAndArgs);
-                        ToggleTabSwitcher();
+                        ToggleTabSwitcher(TerminalApp::AnchorKey::None);
                     }
                 }
 
@@ -393,32 +393,28 @@ namespace winrt::TerminalApp::implementation
         {
             auto idx = e.Index();
             auto changedEvent = e.CollectionChange();
+            auto tab = tabList.GetAt(idx);
 
             switch (changedEvent)
             {
                 case CollectionChange::ItemChanged:
                 {
-                    auto tab = tabList.GetAt(idx);
-                    _allTabs.SetAt(idx, tab);
-                    GenerateCommandForTab(idx, false);
+                    GenerateCommandForTab(idx, false, tab);
                     break;
                 }
                 case CollectionChange::ItemInserted:
                 {
-                    auto tab = tabList.GetAt(idx);
-                    _allTabs.InsertAt(idx, tab);
-                    GenerateCommandForTab(idx, true);
+                    GenerateCommandForTab(idx, true, tab);
 
                     // Unless we're appending to the end, we need to refresh the index indicator text.
-                    if (idx != _allTabs.Size() - 1)
-                    {
-                        RefreshTabIndices(idx);
-                    }
+                    //if (idx != _allTabActions.Size() - 1)
+                    //{
+                    //    RefreshTabIndices(idx);
+                    //}
                     break;
                 }
                 case CollectionChange::ItemRemoved:
                 {
-                    _allTabs.RemoveAt(idx);
                     _allTabActions.RemoveAt(idx);
                     break;
                 }
@@ -426,10 +422,8 @@ namespace winrt::TerminalApp::implementation
         }
     }
 
-    void CommandPalette::GenerateCommandForTab(const uint32_t idx, bool inserted)
+    void CommandPalette::GenerateCommandForTab(const uint32_t idx, bool inserted, TerminalApp::Tab& tab)
     {
-        auto tab = _allTabs.GetAt(idx);
-
         auto focusTabAction = winrt::make_self<implementation::ActionAndArgs>();
         auto args = winrt::make_self<implementation::SwitchToTabArgs>();
         args->TabIndex(idx);
@@ -478,14 +472,15 @@ namespace winrt::TerminalApp::implementation
     {
         for (auto i = startIdx + 1; i < _allTabActions.Size(); ++i)
         {
-            GenerateCommandForTab(i, false);
+            /*GenerateCommandForTab(i, false);*/
         }
     }
 
-    void CommandPalette::ToggleTabSwitcher()
+    void CommandPalette::ToggleTabSwitcher(const TerminalApp::AnchorKey& anchorKey)
     {
         if (_tabSwitcherMode)
         {
+            _anchorKey = anchorKey;
             _tabSwitcherMode = true;
             _allActions = _allTabActions;
             _updateFilteredActions();

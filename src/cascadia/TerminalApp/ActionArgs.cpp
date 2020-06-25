@@ -202,5 +202,6 @@ namespace winrt::TerminalApp::implementation
     winrt::hstring ToggleTabSwitcherArgs::GenerateName()
     {
         // TODO: GENERATE NAMES
+        return RS_(L"OpenSettingsCommandKey");
     }
 }

@@ -103,6 +103,8 @@ namespace winrt::TerminalApp::implementation
 
         { ShortcutAction::OpenSettings, winrt::TerminalApp::implementation::OpenSettingsArgs::FromJson },
 
+        { ShortcutAction::ToggleTabSwitcher, winrt::TerminalApp::implementation::ToggleTabSwitcherArgs::FromJson },
+
         { ShortcutAction::Invalid, nullptr },
     };
 

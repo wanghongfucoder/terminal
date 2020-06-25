@@ -20,7 +20,7 @@ namespace winrt::TerminalApp::implementation
         void SetDispatch(const winrt::TerminalApp::ShortcutActionDispatch& dispatch);
 
         // TabSwitcherMode Specific
-        void ToggleTabSwitcher();
+        void ToggleTabSwitcher(const TerminalApp::AnchorKey& anchorKey);
         void OnTabsChanged(const Windows::Foundation::IInspectable& s, const Windows::Foundation::Collections::IVectorChangedEventArgs& e);
 
         DECLARE_EVENT_WITH_TYPED_EVENT_HANDLER(Closed, _closeHandlers, TerminalApp::CommandPalette, winrt::Windows::UI::Xaml::RoutedEventArgs);
@@ -49,10 +49,10 @@ namespace winrt::TerminalApp::implementation
         void _close();
 
         // TabSwitcherMode Specific
+        TerminalApp::AnchorKey _anchorKey;
         bool _tabSwitcherMode{ true };
-        void GenerateCommandForTab(const uint32_t idx, bool inserted);
+        void GenerateCommandForTab(const uint32_t idx, bool inserted, winrt::TerminalApp::Tab& tab);
         void RefreshTabIndices(const uint32_t startIdx);
-        Windows::Foundation::Collections::IVector<TerminalApp::Tab> _allTabs{ nullptr };
         Windows::Foundation::Collections::IVector<TerminalApp::Command> _allTabActions{ nullptr };
     };
 }
