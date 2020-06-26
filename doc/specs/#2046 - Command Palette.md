@@ -1,7 +1,7 @@
 ---
 author: Mike Griese @zadjii-msft
 created on: 2019-08-01
-last updated: 2020-06-10
+last updated: 2020-06-16
 issue id: 2046
 ---
 
@@ -522,6 +522,13 @@ default. These are largely the actions that are bound by default.
 ]
 ```
 
+## Addenda
+
+This spec also has a follow-up spec which introduces further changes upon this
+original draft. Please also refer to:
+
+* June 2020: Unified keybindings and commands, and synthesized action names.
+
 ## Future considerations
 
 * Commands will provide an easy point for allowing an extension to add its
@@ -786,4 +793,3 @@ Spec: Introduce a mini-specification for localized resource use from JSON [#5280
 [#3327]: https://github.com/microsoft/terminal/issues/3327
 [#3753]: https://github.com/microsoft/terminal/pulls/3753
 [#5888]: https://github.com/microsoft/terminal/pulls/5888
-

@@ -44,35 +44,6 @@ namespace winrt
 
 namespace winrt::TerminalApp::implementation
 {
-    // Method Description:
-    // - Handles the special case of providing a text override for the UI shortcut due to VK_OEM issue.
-    //      Looks at the flags from the KeyChord modifiers and provides a concatenated string value of all
-    //      in the same order that XAML would put them as well.
-    // Return Value:
-    // - a string representation of the key modifiers for the shortcut
-    //NOTE: This needs to be localized with https://github.com/microsoft/terminal/issues/794 if XAML framework issue not resolved before then
-    static std::wstring _FormatOverrideShortcutText(Settings::KeyModifiers modifiers)
-    {
-        std::wstring buffer{ L"" };
-
-        if (WI_IsFlagSet(modifiers, Settings::KeyModifiers::Ctrl))
-        {
-            buffer += L"Ctrl+";
-        }
-
-        if (WI_IsFlagSet(modifiers, Settings::KeyModifiers::Shift))
-        {
-            buffer += L"Shift+";
-        }
-
-        if (WI_IsFlagSet(modifiers, Settings::KeyModifiers::Alt))
-        {
-            buffer += L"Alt+";
-        }
-
-        return buffer;
-    }
-
     TerminalPage::TerminalPage() :
         _tabs{ winrt::single_threaded_observable_vector<TerminalApp::Tab>() }
     {
@@ -209,6 +180,7 @@ namespace winrt::TerminalApp::implementation
         _tabContent.SizeChanged({ this, &TerminalPage::_OnContentSizeChanged });
 
         CommandPalette().SetDispatch(*_actionDispatch);
+        CommandPalette().SetKeyBindings(_settings->GetKeybindings());
         CommandPalette().Closed({ this, &TerminalPage::_CommandPaletteClosed });
 
         _tabs.VectorChanged({ &_commandPalette, &CommandPalette::OnTabsChanged });
@@ -824,6 +796,9 @@ namespace winrt::TerminalApp::implementation
         _actionDispatch->ToggleFullscreen({ this, &TerminalPage::_HandleToggleFullscreen });
         _actionDispatch->ToggleCommandPalette({ this, &TerminalPage::_HandleToggleCommandPalette });
         _actionDispatch->ToggleTabSwitcher({ this, &TerminalPage::_HandleToggleTabSwitcher });
+        _actionDispatch->SetTabColor({ this, &TerminalPage::_HandleSetTabColor });
+        _actionDispatch->OpenTabColorPicker({ this, &TerminalPage::_HandleOpenTabColorPicker });
+        _actionDispatch->RenameTab({ this, &TerminalPage::_HandleRenameTab });
     }
 
     // Method Description:
@@ -1166,6 +1141,18 @@ namespace winrt::TerminalApp::implementation
     }
 
     // Method Description:
+    // - returns a com_ptr to the currently focused tab. This might return null,
+    //   so make sure to check the result!
+    winrt::com_ptr<Tab> TerminalPage::_GetFocusedTab()
+    {
+        if (auto index{ _GetFocusedTabIndex() })
+        {
+            return _GetStrongTabImpl(*index);
+        }
+        return nullptr;
+    }
+
+    // Method Description:
     // - An async method for changing the focused tab on the UI thread. This
     //   method will _only_ set the selected item of the TabView, which will
     //   then also trigger a TabView::SelectionChanged event, which we'll handle
@@ -1410,6 +1397,35 @@ namespace winrt::TerminalApp::implementation
             }
         }
         return { L"Windows Terminal" };
+    }
+
+    // Method Description:
+    // - Handles the special case of providing a text override for the UI shortcut due to VK_OEM issue.
+    //      Looks at the flags from the KeyChord modifiers and provides a concatenated string value of all
+    //      in the same order that XAML would put them as well.
+    // Return Value:
+    // - a string representation of the key modifiers for the shortcut
+    //NOTE: This needs to be localized with https://github.com/microsoft/terminal/issues/794 if XAML framework issue not resolved before then
+    static std::wstring _FormatOverrideShortcutText(Settings::KeyModifiers modifiers)
+    {
+        std::wstring buffer{ L"" };
+
+        if (WI_IsFlagSet(modifiers, Settings::KeyModifiers::Ctrl))
+        {
+            buffer += L"Ctrl+";
+        }
+
+        if (WI_IsFlagSet(modifiers, Settings::KeyModifiers::Shift))
+        {
+            buffer += L"Shift+";
+        }
+
+        if (WI_IsFlagSet(modifiers, Settings::KeyModifiers::Alt))
+        {
+            buffer += L"Alt+";
+        }
+
+        return buffer;
     }
 
     // Method Description:

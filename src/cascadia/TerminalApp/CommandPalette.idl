@@ -15,6 +15,7 @@ namespace TerminalApp
 
         void ToggleVisibility();
         void SetDispatch(ShortcutActionDispatch dispatch);
+        void SetKeyBindings(Microsoft.Terminal.Settings.IKeyBindings keyBindings);
 
         void ToggleTabSwitcher(TerminalApp.AnchorKey anchorKey);
         void OnTabsChanged(IInspectable s, Windows.Foundation.Collections.IVectorChangedEventArgs e);

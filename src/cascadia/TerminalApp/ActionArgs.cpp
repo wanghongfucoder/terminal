@@ -16,12 +16,14 @@
 #include "SplitPaneArgs.g.cpp"
 #include "OpenSettingsArgs.g.cpp"
 #include "ToggleTabSwitcherArgs.g.h"
+#include "SetTabColorArgs.g.cpp"
+#include "RenameTabArgs.g.cpp"
 
 #include <LibraryResources.h>
 
 namespace winrt::TerminalApp::implementation
 {
-    winrt::hstring NewTerminalArgs::GenerateName()
+    winrt::hstring NewTerminalArgs::GenerateName() const
     {
         std::wstringstream ss;
 
@@ -58,7 +60,7 @@ namespace winrt::TerminalApp::implementation
         return winrt::hstring{ s.substr(0, s.size() - 2) };
     }
 
-    winrt::hstring CopyTextArgs::GenerateName()
+    winrt::hstring CopyTextArgs::GenerateName() const
     {
         if (_SingleLine)
         {
@@ -67,30 +69,27 @@ namespace winrt::TerminalApp::implementation
         return RS_(L"CopyTextCommandKey");
     }
 
-    winrt::hstring NewTabArgs::GenerateName()
+    winrt::hstring NewTabArgs::GenerateName() const
     {
         winrt::hstring newTerminalArgsStr;
         if (_TerminalArgs)
         {
             newTerminalArgsStr = _TerminalArgs.GenerateName();
         }
+
         if (newTerminalArgsStr.empty())
         {
             return RS_(L"NewTabCommandKey");
         }
-        else
-        {
-            return winrt::hstring{ fmt::format(L"{}, {}", RS_(L"NewTabCommandKey"), newTerminalArgsStr) };
-        }
-        return L"NewTabArgs";
+        return winrt::hstring{ fmt::format(L"{}, {}", RS_(L"NewTabCommandKey"), newTerminalArgsStr) };
     }
 
-    winrt::hstring SwitchToTabArgs::GenerateName()
+    winrt::hstring SwitchToTabArgs::GenerateName() const
     {
         return winrt::hstring{ fmt::format(L"{}, index:{}", RS_(L"SwitchToTabCommandKey"), _TabIndex) };
     }
 
-    winrt::hstring ResizePaneArgs::GenerateName()
+    winrt::hstring ResizePaneArgs::GenerateName() const
     {
         winrt::hstring directionString;
         switch (_Direction)
@@ -111,7 +110,7 @@ namespace winrt::TerminalApp::implementation
         return winrt::hstring{ fmt::format(RS_(L"ResizePaneWithArgCommandKey").c_str(), directionString) };
     }
 
-    winrt::hstring MoveFocusArgs::GenerateName()
+    winrt::hstring MoveFocusArgs::GenerateName() const
     {
         winrt::hstring directionString;
         switch (_Direction)
@@ -132,8 +131,12 @@ namespace winrt::TerminalApp::implementation
         return winrt::hstring{ fmt::format(RS_(L"MoveFocusWithArgCommandKey").c_str(), directionString) };
     }
 
-    winrt::hstring AdjustFontSizeArgs::GenerateName()
+    winrt::hstring AdjustFontSizeArgs::GenerateName() const
     {
+        // If the amount is just 1 (or -1), we'll just return "Increase font
+        // size" (or "Decrease font size"). If the amount delta has a greater
+        // absolute value, we'll include it like"
+        // * Decrease font size, amount: {delta}"
         if (_Delta < 0)
         {
             return _Delta == -1 ? winrt::hstring{ fmt::format(RS_(L"DecreaseFontSizeCommandKey").c_str()) } :
@@ -146,8 +149,17 @@ namespace winrt::TerminalApp::implementation
         }
     }
 
-    winrt::hstring SplitPaneArgs::GenerateName()
+    winrt::hstring SplitPaneArgs::GenerateName() const
     {
+        // The string will be similar to the following:
+        // * "Duplicate pane[, split: <direction>][, new terminal arguments...]"
+        // * "Split pane[, split: <direction>][, new terminal arguments...]"
+        //
+        // Direction will only be added to the string if the split direction is
+        // not "auto".
+        // If this is a "duplicate pane" action, then the new terminal arguments
+        // will be omitted (as they're unused)
+
         std::wstringstream ss;
         if (_SplitMode == SplitType::Duplicate)
         {
@@ -159,13 +171,15 @@ namespace winrt::TerminalApp::implementation
         }
         ss << L", ";
 
+        // This text is intentionally _not_ localized, to attempt to mirror the
+        // exact syntax that the property would have in JSON.
         switch (_SplitStyle)
         {
         case SplitState::Vertical:
-            ss << L"direction: Vertical, ";
+            ss << L"split: vertical, ";
             break;
         case SplitState::Horizontal:
-            ss << L"direction: Horizontal, ";
+            ss << L"split: horizontal, ";
             break;
         }
 
@@ -186,7 +200,7 @@ namespace winrt::TerminalApp::implementation
         return winrt::hstring{ s.substr(0, s.size() - 2) };
     }
 
-    winrt::hstring OpenSettingsArgs::GenerateName()
+    winrt::hstring OpenSettingsArgs::GenerateName() const
     {
         switch (_Target)
         {
@@ -204,4 +218,29 @@ namespace winrt::TerminalApp::implementation
         // TODO: GENERATE NAMES
         return RS_(L"OpenSettingsCommandKey");
     }
+
+    winrt::hstring SetTabColorArgs::GenerateName() const
+    {
+        // "Set tab color to #RRGGBB"
+        // "Reset tab color"
+        if (_TabColor)
+        {
+            til::color c{ _TabColor.Value() };
+            return winrt::hstring{ fmt::format(RS_(L"SetTabColorCommandKey").c_str(), c.ToHexString(true)) };
+        }
+
+        return RS_(L"ResetTabColorCommandKey");
+    }
+
+    winrt::hstring RenameTabArgs::GenerateName() const
+    {
+        // "Rename tab to \"{_Title}\""
+        // "Reset tab title"
+        if (!_Title.empty())
+        {
+            return winrt::hstring{ fmt::format(RS_(L"RenameTabCommandKey").c_str(), _Title.c_str()) };
+        }
+        return RS_(L"ResetTabNameCommandKey");
+    }
+
 }

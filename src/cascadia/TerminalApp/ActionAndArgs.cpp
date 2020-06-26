@@ -29,8 +29,11 @@ static constexpr std::string_view ResizePaneKey{ "resizePane" };
 static constexpr std::string_view MoveFocusKey{ "moveFocus" };
 static constexpr std::string_view FindKey{ "find" };
 static constexpr std::string_view ToggleFullscreenKey{ "toggleFullscreen" };
-static constexpr std::string_view ToggleCommandPaletteKey{ "toggleCommandPalette" };
 static constexpr std::string_view ToggleTabSwitcherKey{ "toggleTabSwitcher" };
+static constexpr std::string_view SetTabColorKey{ "setTabColor" };
+static constexpr std::string_view OpenTabColorPickerKey{ "openTabColorPicker" };
+static constexpr std::string_view RenameTabKey{ "renameTab" };
+static constexpr std::string_view ToggleCommandPaletteKey{ "commandPalette" };
 
 static constexpr std::string_view ActionKey{ "action" };
 
@@ -71,8 +74,11 @@ namespace winrt::TerminalApp::implementation
         { OpenSettingsKey, ShortcutAction::OpenSettings },
         { ToggleFullscreenKey, ShortcutAction::ToggleFullscreen },
         { SplitPaneKey, ShortcutAction::SplitPane },
+        { SetTabColorKey, ShortcutAction::SetTabColor },
+        { OpenTabColorPickerKey, ShortcutAction::OpenTabColorPicker },
         { UnboundKey, ShortcutAction::Invalid },
         { FindKey, ShortcutAction::Find },
+        { RenameTabKey, ShortcutAction::RenameTab },
         { ToggleCommandPaletteKey, ShortcutAction::ToggleCommandPalette },
         { ToggleTabSwitcherKey, ShortcutAction::ToggleTabSwitcher },
 
@@ -104,6 +110,10 @@ namespace winrt::TerminalApp::implementation
         { ShortcutAction::OpenSettings, winrt::TerminalApp::implementation::OpenSettingsArgs::FromJson },
 
         { ShortcutAction::ToggleTabSwitcher, winrt::TerminalApp::implementation::ToggleTabSwitcherArgs::FromJson },
+
+        { ShortcutAction::SetTabColor, winrt::TerminalApp::implementation::SetTabColorArgs::FromJson },
+
+        { ShortcutAction::RenameTab, winrt::TerminalApp::implementation::RenameTabArgs::FromJson },
 
         { ShortcutAction::Invalid, nullptr },
     };
@@ -217,12 +227,12 @@ namespace winrt::TerminalApp::implementation
         }
     }
 
-    winrt::hstring ActionAndArgs::GenerateName()
+    winrt::hstring ActionAndArgs::GenerateName() const
     {
         // Use a magic static to initialize this map, because we won't be able
-        // to load the resoruces at _init_, only at runtime.
+        // to load the resources at _init_, only at runtime.
         static const auto GeneratedActionNames = []() {
-            return std::map<ShortcutAction, winrt::hstring>{
+            return std::unordered_map<ShortcutAction, winrt::hstring>{
                 { ShortcutAction::CopyText, RS_(L"CopyTextCommandKey") },
                 { ShortcutAction::PasteText, RS_(L"PasteTextCommandKey") },
                 { ShortcutAction::OpenNewTabDropdown, RS_(L"OpenNewTabDropdownCommandKey") },
@@ -248,6 +258,9 @@ namespace winrt::TerminalApp::implementation
                 { ShortcutAction::SplitPane, RS_(L"SplitPaneCommandKey") },
                 { ShortcutAction::Invalid, L"" },
                 { ShortcutAction::Find, RS_(L"FindCommandKey") },
+                { ShortcutAction::SetTabColor, RS_(L"ResetTabColorCommandKey") },
+                { ShortcutAction::OpenTabColorPicker, RS_(L"OpenTabColorPickerCommandKey") },
+                { ShortcutAction::RenameTab, RS_(L"ResetTabNameCommandKey") },
                 { ShortcutAction::ToggleCommandPalette, RS_(L"ToggleCommandPaletteCommandKey") },
                 { ShortcutAction::ToggleTabSwitcher, RS_(L"ToggleTabSwitcherKey") },
             };

@@ -350,6 +350,9 @@
   <data name="CommandPalette_SearchBox.PlaceholderText" xml:space="preserve">
     <value>Type a command name...</value>
   </data>
+  <data name="CommandPalette_NoMatchesText.Text" xml:space="preserve">
+    <value>No matches found</value>
+  </data>
   <data name="CloseWindowCommandKey" xml:space="preserve">
     <value>Close window</value>
   </data>
@@ -386,16 +389,16 @@
     <comment>{0} will be replaced with one of the four directions "DirectionLeft", "DirectionRight", "DirectionUp", or "DirectionDown"</comment>
   </data>
   <data name="DirectionLeft" xml:space="preserve">
-    <value>Left</value>
+    <value>left</value>
   </data>
   <data name="DirectionRight" xml:space="preserve">
-    <value>Right</value>
+    <value>right</value>
   </data>
   <data name="DirectionUp" xml:space="preserve">
-    <value>Up</value>
+    <value>up</value>
   </data>
   <data name="DirectionDown" xml:space="preserve">
-    <value>Down</value>
+    <value>down</value>
   </data>
   <data name="SwitchToTabCommandKey" xml:space="preserve">
     <value>Switch to tab</value>
@@ -479,5 +482,21 @@
   </data>
   <data name="ToggleTabSwitcherKey" xml:space="preserve">
     <value>Toggle tab switcher</value>
+  <data name="SetTabColorCommandKey" xml:space="preserve">
+    <value>Set tab color to {0}</value>
+    <comment>{0} will be replaced with a color, displayed in hexadecimal (#RRGGBB) notation.</comment>
+  </data>
+  <data name="ResetTabColorCommandKey" xml:space="preserve">
+    <value>Reset tab color</value>
+  </data>
+  <data name="OpenTabColorPickerCommandKey" xml:space="preserve">
+    <value>Set the tab color...</value>
+  </data>
+  <data name="RenameTabCommandKey" xml:space="preserve">
+    <value>Rename tab to "{0}"</value>
+    <comment>{0} will be replaced with user-defined string</comment>
+  </data>
+  <data name="ResetTabNameCommandKey" xml:space="preserve">
+    <value>Reset tab title</value>
   </data>
 </root>
