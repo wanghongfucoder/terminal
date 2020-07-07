@@ -380,6 +380,9 @@
   <data name="CloseWindowCommandKey" xml:space="preserve">
     <value>Close window</value>
   </data>
+  <data name="ToggleBorderlessCommandKey" xml:space="preserve">
+    <value>Toggle borderless mode</value>
+  </data>
   <data name="ToggleFullscreenCommandKey" xml:space="preserve">
     <value>Toggle fullscreen</value>
   </data>
