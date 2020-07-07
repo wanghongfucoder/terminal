@@ -231,7 +231,7 @@ namespace winrt::TerminalApp::implementation
             }
             else
             {
-                _ProcessStartupActions();
+                _ProcessStartupActions(true);
             }
         }
     }
@@ -240,10 +240,11 @@ namespace winrt::TerminalApp::implementation
     // - Process all the startup actions in our list of startup actions. We'll
     //   do this all at once here.
     // Arguments:
-    // - <none>
+    // - initial: if true, we're parsing these args during startup, and we
+    //   should fire an Initialized event.
     // Return Value:
     // - <none>
-    winrt::fire_and_forget TerminalPage::_ProcessStartupActions()
+    winrt::fire_and_forget TerminalPage::_ProcessStartupActions(const bool initial)
     {
         // If there are no actions left, do nothing.
         if (_startupActions.empty())
@@ -253,15 +254,24 @@ namespace winrt::TerminalApp::implementation
         auto weakThis{ get_weak() };
 
         // Handle it on a subsequent pass of the UI thread.
-        co_await winrt::resume_foreground(Dispatcher(), CoreDispatcherPriority::Normal);
-        if (auto page{ weakThis.get() })
+        for (const auto& action : _startupActions)
         {
-            for (const auto& action : _startupActions)
+            co_await winrt::resume_foreground(Dispatcher(), CoreDispatcherPriority::Normal);
+            if (auto page{ weakThis.get() })
             {
                 _actionDispatch->DoAction(action);
             }
-
-            _CompleteInitialization();
+            else
+            {
+                return;
+            }
+        }
+        if (auto page{ weakThis.get() })
+        {
+            if (initial)
+            {
+                _CompleteInitialization();
+            }
         }
     }
 
@@ -856,6 +866,7 @@ namespace winrt::TerminalApp::implementation
         _actionDispatch->SetTabColor({ this, &TerminalPage::_HandleSetTabColor });
         _actionDispatch->OpenTabColorPicker({ this, &TerminalPage::_HandleOpenTabColorPicker });
         _actionDispatch->RenameTab({ this, &TerminalPage::_HandleRenameTab });
+        _actionDispatch->ExecuteCommandline({ this, &TerminalPage::_HandleExecuteCommandline });
     }
 
     // Method Description:
@@ -1363,19 +1374,20 @@ namespace winrt::TerminalApp::implementation
 
             const auto controlConnection = _CreateConnectionFromSettings(realGuid, controlSettings);
 
-            const auto canSplit = focusedTab->CanSplitPane(splitType);
-
-            if (!canSplit && _startupState == StartupState::Initialized)
-            {
-                return;
-            }
+            float contentWidth = gsl::narrow_cast<float>(_tabContent.ActualWidth());
+            float contentHeight = gsl::narrow_cast<float>(_tabContent.ActualHeight());
+            winrt::Windows::Foundation::Size availableSpace{ contentWidth, contentHeight };
 
             auto realSplitType = splitType;
-            if (realSplitType == SplitState::Automatic && _startupState < StartupState::Initialized)
+            if (realSplitType == SplitState::Automatic)
             {
-                float contentWidth = gsl::narrow_cast<float>(_tabContent.ActualWidth());
-                float contentHeight = gsl::narrow_cast<float>(_tabContent.ActualHeight());
-                realSplitType = focusedTab->PreCalculateAutoSplit({ contentWidth, contentHeight });
+                realSplitType = focusedTab->PreCalculateAutoSplit(availableSpace);
+            }
+
+            const auto canSplit = focusedTab->PreCalculateCanSplit(realSplitType, availableSpace);
+            if (!canSplit)
+            {
+                return;
             }
 
             TermControl newControl{ controlSettings, controlConnection };
@@ -2175,6 +2187,50 @@ namespace winrt::TerminalApp::implementation
     void TerminalPage::_ClearNonClientAreaColors()
     {
         // TODO GH#3327: Look at what to do with the NC area when we have XAML theming
+    }
+
+    // Function Description:
+    // - This is a helper method to get the commandline out of a
+    //   ExecuteCommandline action, break it into subcommands, and attempt to
+    //   parse it into actions. This is used by _HandleExecuteCommandline for
+    //   processing commandlines in the current WT window.
+    // Arguments:
+    // - args: the ExecuteCommandlineArgs to synthesize a list of startup actions for.
+    // Return Value:
+    // - an empty list if we failed to parse, otherwise a list of actions to execute.
+    std::deque<winrt::TerminalApp::ActionAndArgs> TerminalPage::ConvertExecuteCommandlineToActions(const TerminalApp::ExecuteCommandlineArgs& args)
+    {
+        if (!args)
+        {
+            return {};
+        }
+
+        // Convert the commandline into an array of args with
+        // CommandLineToArgvW, similar to how the app typically does when
+        // called from the commandline.
+        int argc = 0;
+        wil::unique_any<LPWSTR*, decltype(&::LocalFree), ::LocalFree> argv{ CommandLineToArgvW(args.Commandline().c_str(), &argc) };
+        if (argv)
+        {
+            std::vector<winrt::hstring> args;
+
+            // Make sure the first argument is wt.exe, because ParseArgs will
+            // always skip the program name. The particular value of this first
+            // string doesn't terribly matter.
+            args.emplace_back(L"wt.exe");
+            for (auto& elem : wil::make_range(argv.get(), argc))
+            {
+                args.emplace_back(elem);
+            }
+            winrt::array_view<const winrt::hstring> argsView{ args };
+
+            ::TerminalApp::AppCommandlineArgs appArgs;
+            if (appArgs.ParseArgs(argsView) == 0)
+            {
+                return appArgs.GetStartupActions();
+            }
+        }
+        return {};
     }
 
     void TerminalPage::_CommandPaletteClosed(const IInspectable& /*sender*/,

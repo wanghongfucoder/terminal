@@ -327,4 +327,18 @@ namespace winrt::TerminalApp::implementation
         }
         args.Handled(true);
     }
+
+    void TerminalPage::_HandleExecuteCommandline(const IInspectable& /*sender*/,
+                                                 const TerminalApp::ActionEventArgs& actionArgs)
+    {
+        if (const auto& realArgs = actionArgs.ActionArgs().try_as<TerminalApp::ExecuteCommandlineArgs>())
+        {
+            _startupActions = TerminalPage::ConvertExecuteCommandlineToActions(realArgs);
+            if (!_startupActions.empty())
+            {
+                _ProcessStartupActions(false);
+                actionArgs.Handled(true);
+            }
+        }
+    }
 }

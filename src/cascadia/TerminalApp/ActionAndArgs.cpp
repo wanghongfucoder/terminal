@@ -34,6 +34,7 @@ static constexpr std::string_view ToggleFullscreenKey{ "toggleFullscreen" };
 static constexpr std::string_view SetTabColorKey{ "setTabColor" };
 static constexpr std::string_view OpenTabColorPickerKey{ "openTabColorPicker" };
 static constexpr std::string_view RenameTabKey{ "renameTab" };
+static constexpr std::string_view ExecuteCommandlineKey{ "wt" };
 static constexpr std::string_view ToggleCommandPaletteKey{ "commandPalette" };
 
 static constexpr std::string_view ActionKey{ "action" };
@@ -82,6 +83,7 @@ namespace winrt::TerminalApp::implementation
         { UnboundKey, ShortcutAction::Invalid },
         { FindKey, ShortcutAction::Find },
         { RenameTabKey, ShortcutAction::RenameTab },
+        { ExecuteCommandlineKey, ShortcutAction::ExecuteCommandline },
         { ToggleCommandPaletteKey, ShortcutAction::ToggleCommandPalette },
     };
 
@@ -113,6 +115,8 @@ namespace winrt::TerminalApp::implementation
         { ShortcutAction::SetTabColor, winrt::TerminalApp::implementation::SetTabColorArgs::FromJson },
 
         { ShortcutAction::RenameTab, winrt::TerminalApp::implementation::RenameTabArgs::FromJson },
+
+        { ShortcutAction::ExecuteCommandline, winrt::TerminalApp::implementation::ExecuteCommandlineArgs::FromJson },
 
         { ShortcutAction::Invalid, nullptr },
     };
@@ -262,6 +266,7 @@ namespace winrt::TerminalApp::implementation
                 { ShortcutAction::SetTabColor, RS_(L"ResetTabColorCommandKey") },
                 { ShortcutAction::OpenTabColorPicker, RS_(L"OpenTabColorPickerCommandKey") },
                 { ShortcutAction::RenameTab, RS_(L"ResetTabNameCommandKey") },
+                { ShortcutAction::ExecuteCommandline, RS_(L"ExecuteCommandlineCommandKey") },
                 { ShortcutAction::ToggleCommandPalette, RS_(L"ToggleCommandPaletteCommandKey") },
             };
         }();
