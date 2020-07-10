@@ -1374,9 +1374,9 @@ namespace winrt::TerminalApp::implementation
 
             const auto controlConnection = _CreateConnectionFromSettings(realGuid, controlSettings);
 
-            float contentWidth = gsl::narrow_cast<float>(_tabContent.ActualWidth());
-            float contentHeight = gsl::narrow_cast<float>(_tabContent.ActualHeight());
-            winrt::Windows::Foundation::Size availableSpace{ contentWidth, contentHeight };
+            const float contentWidth = ::base::saturated_cast<float>(_tabContent.ActualWidth());
+            const float contentHeight = ::base::saturated_cast<float>(_tabContent.ActualHeight());
+            const winrt::Windows::Foundation::Size availableSpace{ contentWidth, contentHeight };
 
             auto realSplitType = splitType;
             if (realSplitType == SplitState::Automatic)
