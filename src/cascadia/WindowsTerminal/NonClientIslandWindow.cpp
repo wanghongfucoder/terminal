@@ -263,9 +263,10 @@ void NonClientIslandWindow::SetTitlebarContent(winrt::Windows::UI::Xaml::UIEleme
 // - the height of the border above the title bar or 0 if it's disabled
 int NonClientIslandWindow::_GetTopBorderHeight() const noexcept
 {
+    // No border when maximized, or when the titlebar is invisible (by being in
+    // fulscreen or focus mode).
     if (_isMaximized || (!_IsTitlebarVisible()))
     {
-        // no border when maximized
         return 0;
     }
 
@@ -821,13 +822,7 @@ void NonClientIslandWindow::OnApplicationThemeChanged(const ElementTheme& reques
 // - <none>
 void NonClientIslandWindow::_SetIsBorderless(const bool borderlessEnabled)
 {
-    _borderless = borderlessEnabled;
-
-    // Explicitly _don't_ call IslandWindow::_SetIsBorderless. That version will
-    // change the window styles appropriately for the window with the default
-    // titlebar, but for the tabs-in-titlebar mode, we can just get rid of the
-    // title bar entirely.
-
+    IslandWindow::_SetIsBorderless(borderlessEnabled);
     if (_titlebar)
     {
         _titlebar.Visibility(_IsTitlebarVisible() ? Visibility::Visible : Visibility::Collapsed);
@@ -838,17 +833,6 @@ void NonClientIslandWindow::_SetIsBorderless(const bool borderlessEnabled)
     // So, make sure to update the size of the drag region here, so that it
     // _definitely_ goes away.
     _ResizeDragBarWindow();
-
-    // Resize the window, with SWP_FRAMECHANGED, to trigger user32 to
-    // recalculate the non/client areas
-    const til::rectangle windowPos{ GetWindowRect() };
-    SetWindowPos(GetHandle(),
-                 HWND_TOP,
-                 windowPos.left<int>(),
-                 windowPos.top<int>(),
-                 windowPos.width<int>(),
-                 windowPos.height<int>(),
-                 SWP_SHOWWINDOW | SWP_FRAMECHANGED);
 }
 
 // Method Description:
@@ -875,15 +859,13 @@ void NonClientIslandWindow::_SetIsFullscreen(const bool fullscreenEnabled)
 
 // Method Description:
 // - Returns true if the titlebar is visible. For things like fullscreen mode,
-//   borderless mode, this will return false.
+//   focus mode, this will return false.
 // Arguments:
 // - <none>
 // Return Value:
 // - true iff the titlebar is visible
 bool NonClientIslandWindow::_IsTitlebarVisible() const
 {
-    // TODO:GH#2238 - When we add support for titlebar-less mode, this should be
-    // updated to include that mode.
     return !(_fullscreen || _borderless);
 }
 
